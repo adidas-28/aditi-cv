@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#faf8f4" id="meta-theme">
+<meta name="description" content="Aditi Das – Private Markets Research Associate, Morningstar | PitchBook Data">
+<title>Aditi Das – Financial Research</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.css"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+
+[data-theme="light"]{
+  --bg:#faf8f4;--s1:#ffffff;--s2:#f3f0ea;--s3:#ede9e0;
+  --border:#e0d9cc;--border2:#d0c8b8;--text:#1a1612;
+  --muted:#4a4038;--muted2:#3a3028;--gold:#8a6030;
+  --gold2:#6a4820;--gold3:#b08040;--teal:#2a6858;--teal2:#1e5045;
+  --stat-bg:#ffffff;--toggle-bg:#e8e2d8;--toggle-text:#5a5248;
+  --nav-bg:rgba(250,248,244,0.94);--sec-title-color:#1a1612;
+  --sec-num-bg:#f3f0ea;--sec-num-border:#d0c8b8;
+  --highlight-bg:#f5efe4;--meta-theme:#faf8f4;
+  --card-bg:#ffffff;--map-land:#d4c9a8;--map-highlight:#8a6030;
+  --map-border:#b08040;--map-ocean:#e8f0f4;
+}
+[data-theme="dark"]{
+  --bg:#080808;--s1:#0f0f0f;--s2:#151515;--s3:#1c1c1c;
+  --border:#252525;--border2:#2e2e2e;--text:#f5f0e8;
+  --muted:#bbb;--muted2:#d0c8b8;--gold:#c9b99a;--gold2:#e8d5b0;
+  --gold3:#a08060;--teal:#8fb8ad;--teal2:#6a9e92;
+  --stat-bg:#0f0f0f;--toggle-bg:#1c1c1c;--toggle-text:#aaa;
+  --nav-bg:rgba(8,8,8,0.94);--sec-title-color:#f5f0e8;
+  --sec-num-bg:#1c1c1c;--sec-num-border:#2e2e2e;
+  --highlight-bg:#131008;--meta-theme:#080808;
+  --card-bg:#0f0f0f;--map-land:#2a2420;--map-highlight:#c9b99a;
+  --map-border:#a08060;--map-ocean:#0a1218;
+}
+
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:15px;line-height:1.7;transition:background .3s,color .3s;overflow-x:hidden}
+
+/* NAVBAR */
+.navbar{position:fixed;top:0;left:0;right:0;z-index:300;background:var(--nav-bg);border-bottom:0.5px solid var(--border);-webkit-backdrop-filter:saturate(180%) blur(12px);backdrop-filter:saturate(180%) blur(12px);transition:background .3s,border-color .3s}
+.navbar-inner{max-width:900px;margin:0 auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:56px;gap:12px}
+.nav-brand{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--text);text-decoration:none;letter-spacing:-.3px;flex-shrink:0;transition:color .2s}
+.nav-brand:hover{color:var(--gold)}
+.nav-links{display:flex;align-items:center;gap:2px;flex:1;justify-content:center}
+.nav-link{font-size:10.5px;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);text-decoration:none;padding:8px 9px;border-radius:6px;min-height:36px;display:flex;align-items:center;transition:color .2s,background .2s;white-space:nowrap;-webkit-tap-highlight-color:transparent}
+.nav-link:hover{color:var(--gold);background:var(--s2)}
+.nav-link.active{color:var(--gold);background:var(--sec-num-bg)}
+.nav-menu-btn{display:none;background:none;border:0.5px solid var(--border2);border-radius:6px;padding:6px 8px;cursor:pointer;color:var(--text);transition:background .2s;-webkit-tap-highlight-color:transparent;min-width:36px;min-height:36px;align-items:center;justify-content:center}
+.nav-menu-btn:hover{background:var(--s2)}
+.mobile-menu{display:none;flex-direction:column;background:var(--nav-bg);-webkit-backdrop-filter:saturate(180%) blur(12px);backdrop-filter:saturate(180%) blur(12px);border-bottom:0.5px solid var(--border);padding:8px 16px 12px;gap:2px}
+.mobile-menu.open{display:flex}
+.mobile-menu .nav-link{font-size:12px;padding:10px 12px;min-height:44px;border-radius:8px}
+
+/* TOGGLE */
+.theme-toggle{display:flex;align-items:center;gap:7px;background:var(--toggle-bg);border:0.5px solid var(--border2);border-radius:40px;padding:5px 11px 5px 6px;cursor:pointer;flex-shrink:0;transition:background .3s,border-color .3s;user-select:none;-webkit-tap-highlight-color:transparent;touch-action:manipulation;min-height:34px}
+.toggle-track{width:32px;height:17px;border-radius:17px;background:var(--border2);position:relative;transition:background .3s;flex-shrink:0}
+[data-theme="dark"] .toggle-track{background:var(--gold3)}
+.toggle-thumb{position:absolute;top:2px;left:2px;width:13px;height:13px;border-radius:50%;background:#fff;transition:transform .28s cubic-bezier(.4,0,.2,1);box-shadow:0 1px 3px rgba(0,0,0,.25)}
+[data-theme="dark"] .toggle-thumb{transform:translateX(15px)}
+.toggle-label{font-size:10px;letter-spacing:.8px;text-transform:uppercase;color:var(--toggle-text);font-weight:500;transition:color .3s;white-space:nowrap}
+@media(max-width:480px){.toggle-label{display:none}}
+
+.page{max-width:900px;margin:0 auto;padding:80px 24px 100px}
+
+/* HERO */
+.hero{position:relative;padding-bottom:44px;margin-bottom:44px}
+.hero-inner{display:grid;grid-template-columns:1fr auto;gap:32px;align-items:center}
+.hero-left{min-width:0}
+.hero-right-stats{display:flex;flex-direction:column;gap:1px;background:var(--border);border:0.5px solid var(--border);border-radius:10px;overflow:hidden;flex-shrink:0;min-width:200px}
+.hstat-cell{background:var(--s1);padding:14px 20px;transition:background .3s;border-bottom:0.5px solid var(--border)}
+.hstat-cell:last-child{border-bottom:none}
+.hstat-num{font-family:'Playfair Display',serif;font-size:clamp(22px,3vw,30px);font-weight:700;color:var(--gold);line-height:1;margin-bottom:4px}
+.hstat-label{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);line-height:1.3}
+.hero-rule{position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,var(--gold3) 0%,var(--border) 60%,transparent 100%)}
+.hero-eyebrow{font-size:10px;letter-spacing:3.5px;text-transform:uppercase;color:var(--teal);margin-bottom:14px;font-weight:400}
+.hero-name{font-family:'Playfair Display',serif;font-size:clamp(36px,7vw,62px);font-weight:700;line-height:1;color:var(--text);margin-bottom:8px;letter-spacing:clamp(-1px,-0.03em,-2px)}
+.hero-subtitle{font-family:'Playfair Display',serif;font-size:clamp(14px,2.5vw,18px);font-weight:400;font-style:italic;color:var(--gold3);margin-bottom:24px;letter-spacing:.3px}
+.hero-meta{display:flex;flex-wrap:wrap;gap:14px 20px;align-items:center}
+.hero-meta a,.hero-meta span{font-size:12px;color:var(--muted);text-decoration:none;letter-spacing:.3px;transition:color .2s;display:flex;align-items:center;gap:5px}
+.hero-meta a:hover,.hero-meta a:focus{color:var(--gold);outline:none}
+.hero-meta .sep{width:3px;height:3px;background:var(--border2);border-radius:50%;flex-shrink:0}
+@media(max-width:640px){.hero-inner{grid-template-columns:1fr}.hero-right-stats{flex-direction:row;min-width:unset}.hstat-cell{flex:1;text-align:center;border-bottom:none;border-right:0.5px solid var(--border)}.hstat-cell:last-child{border-right:none}}
+@media(max-width:420px){.hero-meta .sep{display:none}}
+
+/* STAT STRIP */
+.stat-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:48px}
+.stat-cell{background:var(--stat-bg);padding:18px 12px;text-align:center;transition:background .3s}
+.stat-num{font-family:'Playfair Display',serif;font-size:clamp(22px,5vw,32px);font-weight:700;color:var(--gold);line-height:1}
+.stat-label{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-top:5px}
+
+/* IMPACT COUNTERS */
+.impact-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:0}
+.impact-card{background:var(--s1);border:0.5px solid var(--border);border-radius:10px;padding:20px 16px;text-align:center;position:relative;overflow:hidden;transition:background .3s}
+.impact-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--gold3),transparent)}
+.impact-num{font-family:'Playfair Display',serif;font-size:clamp(28px,4vw,40px);font-weight:700;color:var(--gold);line-height:1;margin-bottom:6px}
+.impact-label{font-size:11px;font-weight:500;color:var(--text);margin-bottom:4px}
+.impact-sub{font-size:10px;color:var(--muted);letter-spacing:.3px;line-height:1.4}
+
+/* SECTION */
+.sec{margin-bottom:56px;scroll-margin-top:76px}
+.sec-head{display:flex;align-items:center;gap:12px;margin-bottom:26px;padding:12px 16px;background:var(--highlight-bg);border:0.5px solid var(--border);border-left:3px solid var(--gold3);border-radius:0 8px 8px 0;transition:background .3s,border-color .3s}
+.sec-num{font-family:'Playfair Display',serif;font-size:11px;font-weight:700;color:var(--gold);background:var(--sec-num-bg);border:0.5px solid var(--sec-num-border);border-radius:5px;padding:3px 8px;letter-spacing:.3px;transition:background .3s;white-space:nowrap;flex-shrink:0}
+.sec-title{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--sec-title-color);font-weight:500}
+.sec-line{flex:1;height:0.5px;background:linear-gradient(90deg,var(--border2),transparent)}
+
+/* PROFILE */
+.summary-block{border-left:2px solid var(--gold);padding-left:18px}
+.summary-block p{font-size:14px;color:var(--muted2);line-height:1.85}
+
+/* TIMELINE */
+.timeline{position:relative;padding-left:26px}
+.timeline::before{content:'';position:absolute;left:5px;top:8px;bottom:0;width:0.5px;background:linear-gradient(180deg,var(--gold3),transparent)}
+.tl-item{position:relative;margin-bottom:32px;padding-bottom:32px;border-bottom:0.5px solid var(--border)}
+.tl-item:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
+.tl-dot{position:absolute;left:-26px;top:5px;width:12px;height:12px;border-radius:50%;border:1.5px solid var(--gold3);background:var(--bg);display:flex;align-items:center;justify-content:center;transition:background .3s;flex-shrink:0}
+.tl-dot::after{content:'';width:4px;height:4px;border-radius:50%;background:var(--gold)}
+.tl-header{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:5px;flex-wrap:wrap}
+.tl-role{font-family:'Playfair Display',serif;font-size:clamp(16px,3vw,19px);font-weight:700;color:var(--gold2);padding-bottom:2px;border-bottom:1.5px solid var(--gold3)}
+.tl-period{font-size:10px;color:var(--teal);letter-spacing:1px;text-transform:uppercase;white-space:nowrap;background:var(--s2);padding:4px 10px;border-radius:20px;border:0.5px solid var(--border2);transition:background .3s,border-color .3s;flex-shrink:0}
+.tl-company{font-size:12px;color:var(--gold3);margin-bottom:10px;letter-spacing:.3px}
+.tl-bullets{list-style:none}
+.tl-bullets li{font-size:13px;color:var(--muted);padding:4px 0 4px 16px;position:relative;line-height:1.65}
+.tl-bullets li::before{content:'▸';position:absolute;left:0;color:var(--teal2);font-size:10px;top:6px}
+
+/* TRAINING SUB-SECTION */
+.tl-subsection{margin-top:14px;padding:14px 16px;background:var(--s2);border:0.5px solid var(--border);border-left:2px solid var(--teal2);border-radius:0 8px 8px 0;transition:background .3s}
+.tl-subsection-title{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--teal2);font-weight:600;margin-bottom:8px}
+
+/* PROJECTS */
+.proj-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.proj-card{background:var(--s1);border:0.5px solid var(--border);border-radius:10px;padding:18px;position:relative;overflow:hidden;transition:border-color .25s,background .3s}
+.proj-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--gold3),transparent)}
+.proj-card:hover{border-color:var(--border2)}
+.proj-tag{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--teal2);margin-bottom:7px;font-weight:500}
+.proj-name{font-family:'Playfair Display',serif;font-size:14px;font-weight:700;color:var(--gold2);border-bottom:0.5px solid var(--border);padding-bottom:8px;margin-bottom:9px}
+.proj-bullets{list-style:none}
+.proj-bullets li{font-size:12px;color:var(--muted);padding:3px 0 3px 14px;position:relative;line-height:1.6}
+.proj-bullets li::before{content:'▸';position:absolute;left:0;color:var(--teal2);font-size:9px;top:5px}
+.proj-link{display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--teal);text-decoration:none;margin-top:8px;padding:3px 8px;border:0.5px solid var(--teal2);border-radius:4px;transition:background .2s}
+.proj-link:hover{background:var(--s2)}
+
+/* STAT RIGHT BLOCK — Image 1 style */
+.stat-right-wrap{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);border:0.5px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:0}
+.stat-right-cell{background:var(--s1);padding:18px 20px;display:flex;align-items:center;gap:16px;transition:background .3s}
+.stat-right-num{font-family:'Playfair Display',serif;font-size:clamp(26px,4vw,38px);font-weight:700;color:var(--gold);line-height:1;white-space:nowrap}
+.stat-right-meta{display:flex;flex-direction:column;gap:2px}
+.stat-right-label{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);line-height:1.3}
+
+/* MAP v2 — Image 2 style */
+.map-stat-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border:0.5px solid var(--border);border-radius:10px 10px 0 0;overflow:hidden}
+.map-stat-cell{background:var(--s2);padding:14px 16px;text-align:center;transition:background .3s}
+.map-stat-num{font-family:'Playfair Display',serif;font-size:clamp(18px,3vw,26px);font-weight:700;color:var(--gold);line-height:1}
+.map-stat-label{font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-top:4px}
+.map-wrap{background:var(--map-ocean);border:0.5px solid var(--border);border-top:none;border-radius:0 0 10px 10px;overflow:hidden}
+.map-wrap svg{width:100%;height:auto;display:block}
+.map-dot-legend{display:flex;flex-wrap:wrap;gap:10px 20px;padding:12px 0 0}
+.map-dot-item{display:flex;align-items:center;gap:6px;font-size:10px;letter-spacing:.5px;text-transform:uppercase;color:var(--muted)}
+.map-dot-item .dot{width:8px;height:8px;border-radius:50%;background:var(--gold);flex-shrink:0}
+
+@media(max-width:600px){
+  .stat-right-wrap{grid-template-columns:1fr}
+  .map-stat-bar{grid-template-columns:repeat(2,1fr)}
+}
+
+/* MAP */
+.map-container{position:relative;width:100%;background:var(--map-ocean);border:0.5px solid var(--border);border-radius:10px;overflow:hidden}
+.map-container svg{width:100%;height:auto;display:block}
+.map-legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.map-legend-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted)}
+.map-legend-dot{width:10px;height:10px;border-radius:50%;background:var(--gold);flex-shrink:0}
+.country-list{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+.country-tag{font-size:11px;padding:4px 10px;background:var(--s2);border:0.5px solid var(--border2);border-radius:20px;color:var(--muted2);display:flex;align-items:center;gap:5px}
+.country-tag .dot{width:6px;height:6px;border-radius:50%;background:var(--gold3);flex-shrink:0}
+
+/* SKILLS */
+.skills-wrap{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.skill-box{background:var(--s1);border:0.5px solid var(--border);border-radius:10px;padding:16px;transition:background .3s}
+.skill-box-label{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--teal2);margin-bottom:10px;font-weight:500}
+.tag-wrap{display:flex;flex-wrap:wrap;gap:5px}
+.tag{font-size:11px;padding:4px 9px;background:var(--s3);border:0.5px solid var(--border2);border-radius:4px;color:var(--muted2);transition:background .3s,border-color .3s}
+
+/* AWARDS */
+.award-list{display:flex;flex-direction:column;gap:8px}
+.award-row{display:flex;align-items:center;gap:14px;padding:12px 16px;background:var(--s1);border:0.5px solid var(--border);border-radius:10px;position:relative;overflow:hidden;transition:background .3s}
+.award-row::after{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--gold3)}
+.award-icon{font-size:19px;color:var(--gold);flex-shrink:0}
+.award-name{font-size:13px;color:var(--text);font-weight:500}
+.award-sub{font-size:11px;color:var(--muted);margin-top:2px}
+
+/* EDUCATION */
+.edu-rows{display:flex;flex-direction:column}
+.edu-row{display:flex;justify-content:space-between;align-items:flex-start;padding:14px 0;border-bottom:0.5px solid var(--border);gap:12px}
+.edu-row:last-child{border-bottom:none}
+.edu-deg{font-size:14px;font-weight:500;color:var(--text)}
+.edu-school{font-size:12px;color:var(--muted);margin-top:3px}
+.edu-yr{font-size:12px;color:var(--gold);white-space:nowrap;background:var(--s2);padding:3px 10px;border-radius:4px;border:0.5px solid var(--border);transition:background .3s;flex-shrink:0}
+
+/* CERTS */
+.cert-row{display:flex;flex-wrap:wrap;gap:8px}
+.cert{font-size:12px;padding:7px 14px;border:0.5px solid var(--gold3);border-radius:4px;color:var(--teal);letter-spacing:.3px}
+
+/* LANGUAGES */
+.lang-row{display:flex;flex-wrap:wrap;gap:8px}
+.lang-pill{font-size:11px;padding:5px 13px;border-radius:20px;border:0.5px solid var(--border2);color:var(--muted2)}
+.lang-pill.native{border-color:var(--gold3);color:var(--gold)}
+.lang-pill.fluent{border-color:var(--teal2);color:var(--teal)}
+
+@media(max-width:700px){
+  .nav-links{display:none}.nav-menu-btn{display:flex}
+  .skills-wrap{grid-template-columns:1fr}.proj-grid{grid-template-columns:1fr}
+  .impact-strip{grid-template-columns:1fr}
+}
+@media(max-width:480px){
+  .page{padding:74px 16px 80px}.navbar-inner{padding:0 16px;height:52px}
+  .stat-strip{grid-template-columns:repeat(3,1fr)}.tl-header{flex-direction:column;gap:6px}
+  .sec-head{padding:10px 12px}
+}
+@media print{
+  .navbar,.nav-menu-btn,.mobile-menu{display:none!important}
+  body{font-size:12px;background:#fff;color:#000}
+  .page{padding:16px;max-width:100%}
+  .sec{break-inside:avoid;margin-bottom:28px}
+  .proj-grid{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+<body>
+
+<nav class="navbar" role="navigation" aria-label="Main navigation">
+  <div class="navbar-inner">
+    <a href="#top" class="nav-brand">Aditi Das</a>
+    <div class="nav-links" id="nav-links">
+      <a href="#profile"    class="nav-link" data-section="profile">Profile</a>
+      <a href="#experience" class="nav-link" data-section="experience">Experience</a>
+      <a href="#projects"   class="nav-link" data-section="projects">Projects</a>
+      <a href="#coverage"   class="nav-link" data-section="coverage">Coverage</a>
+      <a href="#skills"     class="nav-link" data-section="skills">Skills</a>
+      <a href="#awards"     class="nav-link" data-section="awards">Awards</a>
+      <a href="#education"  class="nav-link" data-section="education">Education</a>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+      <button class="nav-menu-btn" id="menu-btn" aria-label="Toggle menu" aria-expanded="false">
+        <i class="ti ti-menu-2" style="font-size:18px" aria-hidden="true"></i>
+      </button>
+      <div class="theme-toggle" id="theme-toggle" role="button" aria-label="Toggle colour theme" tabindex="0">
+        <div class="toggle-track"><div class="toggle-thumb"></div></div>
+        <span class="toggle-label" id="toggle-label">Dark</span>
+      </div>
+    </div>
+  </div>
+  <div class="mobile-menu" id="mobile-menu" role="menu">
+    <a href="#profile"    class="nav-link" role="menuitem" data-section="profile">Profile</a>
+    <a href="#experience" class="nav-link" role="menuitem" data-section="experience">Experience</a>
+    <a href="#projects"   class="nav-link" role="menuitem" data-section="projects">Projects</a>
+    <a href="#coverage"   class="nav-link" role="menuitem" data-section="coverage">Coverage</a>
+    <a href="#skills"     class="nav-link" role="menuitem" data-section="skills">Skills</a>
+    <a href="#awards"     class="nav-link" role="menuitem" data-section="awards">Awards</a>
+    <a href="#education"  class="nav-link" role="menuitem" data-section="education">Education</a>
+  </div>
+</nav>
+
+<div class="page" id="top">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-inner">
+      <div class="hero-left">
+        <div class="hero-eyebrow">Financial Research &middot; Private Markets &middot; VC Intelligence</div>
+        <h1 class="hero-name">Aditi Das</h1>
+        <div class="hero-subtitle">Research Associate, Morningstar | PitchBook Data</div>
+        <div class="hero-meta">
+          <span>Mumbai, India</span>
+          <span class="sep" aria-hidden="true"></span>
+          <span>+91 98905 70148</span>
+          <span class="sep" aria-hidden="true"></span>
+          <a href="mailto:aditi.2812.das@gmail.com">aditi.2812.das@gmail.com</a>
+          <span class="sep" aria-hidden="true"></span>
+          <a href="https://www.linkedin.com/in/aditi-das28" target="_blank" rel="noopener noreferrer">
+            <i class="ti ti-brand-linkedin" style="font-size:14px" aria-hidden="true"></i>linkedin.com/in/aditi-das28
+          </a>
+          <span class="sep" aria-hidden="true"></span>
+          <a href="https://adidas-28.github.io/Project-Dashboard/" target="_blank" rel="noopener noreferrer">
+            <i class="ti ti-layout-dashboard" style="font-size:14px" aria-hidden="true"></i>adidas-28.github.io/Project-Dashboard
+          </a>
+        </div>
+      </div>
+      <div class="hero-right-stats">
+        <div class="hstat-cell">
+          <div class="hstat-num" id="cnt-profiles">1,200+</div>
+          <div class="hstat-label">New Company Profiles</div>
+        </div>
+        <div class="hstat-cell">
+          <div class="hstat-num" id="cnt-loops">1,700+</div>
+          <div class="hstat-label">Close Loop Profiles</div>
+        </div>
+        <div class="hstat-cell">
+          <div class="hstat-num" id="cnt-rounds">1,000+</div>
+          <div class="hstat-label">New Rounds Tracked</div>
+        </div>
+      </div>
+    </div>
+    <div class="hero-rule" aria-hidden="true"></div>
+  </div>
+
+  <!-- STAT STRIP -->
+  <div class="stat-strip" role="list" aria-label="Career highlights">
+    <div class="stat-cell" role="listitem">
+      <div class="stat-num">3+</div>
+      <div class="stat-label">Years Experience</div>
+    </div>
+    <div class="stat-cell" role="listitem">
+      <div class="stat-num">5</div>
+      <div class="stat-label">Major Projects</div>
+    </div>
+    <div class="stat-cell" role="listitem">
+      <div class="stat-num">3&times;</div>
+      <div class="stat-label">Performance Awards</div>
+    </div>
+  </div>
+
+  <!-- 01 PROFILE -->
+  <section class="sec" id="profile">
+    <div class="sec-head">
+      <span class="sec-num">01</span>
+      <span class="sec-title">Profile</span>
+      <div class="sec-line" aria-hidden="true"></div>
+    </div>
+    <div class="summary-block">
+      <p>Research Associate with 3+ years at Morningstar | PitchBook Data. Deep expertise in private markets intelligence, venture capital research, and financial data ecosystems. Specialised in tracking funding activity, ownership structures, and valuation data across venture-backed and private companies. Proven track record sourcing proprietary investment insights from VC firms, angel investors, limited partners, and executive leadership teams. Strong foundation in research operations, financial data quality assurance, and cross-stakeholder collaboration. Experienced in people management, having served as buddy, trainer, and floor support lead for teams of 6&ndash;8 researchers. Recognised with multiple performance awards for research accuracy, initiative, and contributions to critical investment intelligence projects.</p>
+    </div>
+  </section>
+
+  <!-- 02 EXPERIENCE -->
+  <section class="sec" id="experience">
+    <div class="sec-head">
+      <span class="sec-num">02</span>
+      <span class="sec-title">Experience</span>
+      <div class="sec-line" aria-hidden="true"></div>
+    </div>
+    <div class="timeline">
+
+      <div class="tl-item">
+        <div class="tl-dot" aria-hidden="true"></div>
+        <div class="tl-header">
+          <div class="tl-role">Research Associate</div>
+          <div class="tl-period">Jul 2024 &ndash; May 2026</div>
+        </div>
+        <div class="tl-company">Morningstar | PitchBook Data &middot; Navi Mumbai</div>
+        <ul class="tl-bullets">
+          <li>Conduct in-depth research and analysis on private and venture-backed companies across all funding stages including angel investment, equity crowdfunding, bootstrapping, M&amp;A, reverse mergers, and leveraged buyouts.</li>
+          <li>Monitor and track investment activity, funding rounds, and corporate actions to maintain real-time accuracy of valuation and ownership data within the PitchBook platform.</li>
+          <li>Source proprietary investment insights directly from VC firms, angel investors, service providers, limited partners, and executive leadership teams.</li>
+          <li>Analyse financial statements, ownership structures, funding activity, and valuation trends to generate investment insights and support research-driven decision making.</li>
+          <li>Collaborate with key stakeholders to verify and enhance data accuracy, implementing timely updates that reflect the dynamic private markets and valuation landscape.</li>
+          <li>Manage and maintain Confluence documentation for ongoing research projects, ensuring structured, accurate, and accessible knowledge management for research teams.</li>
+          <li>Built 1,200+ new company profiles under the Venture Capital vertical, sourcing and structuring investment data across funding stages, ownership structures, and management details.</li>
+          <li>Scrubbed, validated, and edited 1,700+ VC-backed company profiles within a one-year turnaround, ensuring data accuracy, completeness, and compliance with collection standards.</li>
+          <li>Tracked and updated new VC funding rounds across 1,000+ companies, monitoring deal activity, investor participation, and valuation changes to maintain real-time platform accuracy.</li>
+        </ul>
+
+
+        <div class="tl-subsection">
+          <div class="tl-subsection-title">Training, Knowledge Transfer &amp; Floor Support</div>
+          <ul class="tl-bullets">
+            <li>Onboarded and trained new researchers; designed process walkthroughs and knowledge-sharing sessions on research methodologies and quality standards.</li>
+            <li>Managed and mentored a team of 6&ndash;8 researchers; provided regular feedback, performance updates to management, and floor support during ramp-up phases.</li>
+            <li>Partnered with team leads to identify training gaps and improve learning effectiveness through structured guidance and mentoring.</li>
+            <li>Maintained training documentation and process guides to support ongoing capability building and onboarding efficiency.</li>
+            <li>Recognised for proactively resolving workflow bottlenecks during high-volume periods, enabling the team to meet productivity and quality benchmarks.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-dot" aria-hidden="true"></div>
+        <div class="tl-header">
+          <div class="tl-role">Data Research Analyst</div>
+          <div class="tl-period">Dec 2022 &ndash; Jul 2024</div>
+        </div>
+        <div class="tl-company">Morningstar &middot; Navi Mumbai</div>
+        <ul class="tl-bullets">
+          <li>Calculated Normalized Earnings for assigned companies, analysing financial trends, profitability drivers, and influencing factors to inform investment research and analytical workflows.</li>
+          <li>Applied profitability metrics to compare and evaluate company performance, generating actionable intelligence for research analysis and stakeholder reporting.</li>
+          <li>Integrated the PitchBook platform within financial research workflows to support private equity research, improving data accuracy and depth of investment insights.</li>
+          <li>Trained junior analysts on data research methodologies, financial data collection processes, and quality assurance standards to strengthen team output quality.</li>
+          <li>Collaborated with research teams to enhance data collection methodologies, improving accuracy and reliability of financial data across analytical deliverables.</li>
+          <li>Supported team leads and project managers in meeting research milestones and maintaining productivity across concurrent research assignments.</li>
+        </ul>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-dot" aria-hidden="true"></div>
+        <div class="tl-header">
+          <div class="tl-role">Data Mining Analyst</div>
+          <div class="tl-period">May 2022 &ndash; Jul 2022</div>
+        </div>
+        <div class="tl-company">Naturefit &middot; Vashi &nbsp;&middot;&nbsp; Internship</div>
+        <ul class="tl-bullets">
+          <li>Compiled and analysed sales data and profit &amp; loss statements to support business decision-making, cost optimisation, and revenue analysis.</li>
+          <li>Identified patterns and anomalies in sales performance data, presenting findings in structured reports that contributed to actionable business recommendations.</li>
+        </ul>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- 03 PROJECTS -->
+  <section class="sec" id="projects">
+    <div class="sec-head">
+      <span class="sec-num">03</span>
+      <span class="sec-title">Key Projects</span>
+      <div class="sec-line" aria-hidden="true"></div>
+    </div>
+    <div class="proj-grid">
+      <div class="proj-card">
+        <div class="proj-tag">Data Quality &middot; Financial Restatement</div>
+        <div class="proj-name">PitchBook Rebalance (PBR)</div>
+        <ul class="proj-bullets">
+          <li>Identified and reprocessed historical periods with incomplete or discrepant financial data across the PitchBook system, sourcing internal and external data to validate and correct investment records.</li>
+          <li>Re-edited previously processed company data using restated financial information to ensure accurate calculation of Normalized Metrics across portfolio segments.</li>
+        </ul>
+      </div>
+      <div class="proj-card">
+        <div class="proj-tag">Market Integrity &middot; Cross-Market Audit</div>
+        <div class="proj-name">Market Quality Clean-Up Drive</div>
+        <ul class="proj-bullets">
+          <li>Conducted quality audit of analyst research across high-market-cap companies in Korean and Chinese (Simplified) markets, identifying calculation defects and applying corrective measures.</li>
+          <li>Delivered validated, corrected outputs to the PitchBook research team, improving data quality standards across targeted high-priority market segments.</li>
+        </ul>
+      </div>
+      <div class="proj-card">
+        <div class="proj-tag">Data Recovery &middot; Pipeline Integrity</div>
+        <div class="proj-name">Junk Audit &mdash; Investment Data Recovery</div>
+        <ul class="proj-bullets">
+          <li>Reviewed analyst-flagged files to verify whether financially relevant company and investment data had been incorrectly excluded from the research pipeline.</li>
+          <li>Recovered and reinstated valid data per collection policy, reducing data loss and improving completeness of investment intelligence records.</li>
+        </ul>
+      </div>
+      <div class="proj-card">
+        <div class="proj-tag">Financial Analysis &middot; Investment Research</div>
+        <div class="proj-name">Investment Research &amp; Financial Analysis Support</div>
+        <ul class="proj-bullets">
+          <li>Conducted fundamental research and financial statement analysis on private and venture-backed companies, evaluating business performance, ownership structures, funding activity, and valuation trends.</li>
+          <li>Analysed profitability metrics and corporate developments to generate actionable investment intelligence for institutional stakeholders.</li>
+          <li>Prepared research summaries by synthesising information from financial statements, company disclosures, management interactions, and third-party sources.</li>
+        </ul>
+      </div>
+      <div class="proj-card" style="grid-column:1/-1">
+        <div class="proj-tag">Automation &middot; VC Intelligence</div>
+        <div class="proj-name">PitchBook VC Vertical Profiling</div>
+        <ul class="proj-bullets">
+          <li>Executed full-cycle company profiling under the Venture Capital vertical, sourcing comprehensive company intelligence across multiple data channels including seed-stage deal tracking and full management buildout for private companies.</li>
+          <li>Developed AutoHotKey-based process automation scripts to streamline repetitive data collection workflows, demonstrating initiative in operational efficiency improvement.</li>
+        </ul>
+        <a href="https://adidas-28.github.io/Project-Dashboard/" target="_blank" rel="noopener noreferrer" class="proj-link">
+          <i class="ti ti-external-link" style="font-size:12px"></i> View Project Dashboard
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 04 GLOBAL COVERAGE MAP -->
+  <section class="sec" id="coverage">
+    <div class="sec-head">
+      <span class="sec-num">04</span>
+      <span class="sec-title">Global Market Coverage</span>
+      <div class="sec-line" aria-hidden="true"></div>
+    </div>
+
+    <!-- 4-stat bar with profile numbers restored -->
+    <div class="map-stat-bar">
+      <div class="map-stat-cell">
+        <div class="map-stat-num">17</div>
+        <div class="map-stat-label">Markets Covered</div>
+      </div>
+      <div class="map-stat-cell">
+        <div class="map-stat-num">1,200+</div>
+        <div class="map-stat-label">New Company Profiles</div>
+      </div>
+      <div class="map-stat-cell">
+        <div class="map-stat-num">1,700+</div>
+        <div class="map-stat-label">Close Loop Profiles</div>
+      </div>
+      <div class="map-stat-cell">
+        <div class="map-stat-num">1,000+</div>
+        <div class="map-stat-label">New Rounds Tracked</div>
+      </div>
+    </div>
+
+    <!-- Leaflet map -->
+    <div id="coverage-map" style="height:420px;border:0.5px solid var(--border);border-top:none;border-radius:0 0 10px 10px;overflow:hidden;z-index:0"></div>
+
+    <!-- Legend -->
+    <div class="map-dot-legend">
+      <span class="map-dot-item"><span class="dot"></span>UK</span>
+      <span class="map-dot-item"><span class="dot"></span>France</span>
+      <span class="map-dot-item"><span class="dot"></span>Germany</span>
+      <span class="map-dot-item"><span class="dot"></span>Switzerland</span>
+      <span class="map-dot-item"><span class="dot"></span>Sweden</span>
+      <span class="map-dot-item"><span class="dot"></span>Norway</span>
+      <span class="map-dot-item"><span class="dot"></span>Denmark</span>
+      <span class="map-dot-item"><span class="dot"></span>Italy</span>
+      <span class="map-dot-item"><span class="dot"></span>UAE</span>
+      <span class="map-dot-item"><span class="dot"></span>India</span>
+      <span class="map-dot-item"><span class="dot"></span>Singapore</span>
+      <span class="map-dot-item"><span class="dot"></span>South Korea</span>
+      <span class="map-dot-item"><span class="dot"></span>Japan</span>
+      <span class="map-dot-item"><span class="dot"></span>Australia</span>
+      <span class="map-dot-item"><span class="dot"></span>Canada</span>
+      <span class="map-dot-item"><span class="dot"></span>North America</span>
+      <span class="map-dot-item"><span class="dot"></span>South America</span>
+    </div>
+  </section>
+
+  <!-- 05 SKILLS -->
+  <section class="sec" id="skills">
+    <div class="sec-head">
+      <span class="sec-num">05</span>
+      <span class="sec-title">Skills</span>
+      <div class="sec-line" aria-hidden="true"></div>
+    </div>
+    <div class="skills-wrap">
+      <div class="skill-box">
+        <div class="skill-box-label">Domain</div>
+        <div class="tag-wrap">
+          <span class="tag">Private Markets</span><span class="tag">Venture Capital</span><span class="tag">Funding Rounds</span><span class="tag">Company Profiling</span><span class="tag">Ownership Structures</span><span class="tag">Valuation Intelligence</span><span class="tag">Due Diligence</span><span class="tag">Debt Deals Research</span><span class="tag">Financial Research</span>
+        </div>
+      </div>
+      <div class="skill-box">
+        <div class="skill-box-label">Platforms &amp; Tools</div>
+        <div class="tag-wrap">
+          <span class="tag">PitchBook</span><span class="tag">Excel Advanced</span><span class="tag">Power BI</span><span class="tag">Confluence</span><span class="tag">AutoHotKey</span><span class="tag">MS Office Suite</span><span class="tag">Dashboard</span><span class="tag">AI Tools</span>
+        </div>
+      </div>
+      <div class="skill-box">
+        <div class="skill-box-label">Analytical &amp; People</div>
+        <div class="tag-wrap">
+          <span class="tag">Financial Analysis</span><span class="tag">Data Validation</span><span class="tag">Normalized Earnings</span><span class="tag">Market Intelligence</span><span class="tag">Research Ops</span><span class="tag">Stakeholder Comms</span><span class="tag">People Management</span><span class="tag">Training &amp; Mentoring</span><span class="tag">Floor Support</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 06 AWARDS -->
+  <section class="sec" id="awards">
+    <div class="sec-head">
+      <span class="sec-num">06</span>
+      <span class="sec-title">Awards</span>
+      <div class="sec-line" aria-hidden="true"></div>
+    </div>
+    <div class="award-list">
+      <div class="award-row">
+        <i class="ti ti-trophy award-icon" aria-hidden="true"></i>
+        <div>
+          <div class="award-name">Newbie of the Quarter &middot; Q4 2024</div>
+          <div class="award-sub">Morningstar | PitchBook Data</div>
+        </div>
+      </div>
+      <div class="award-row">
+        <i class="ti ti-medal award-icon" aria-hidden="true"></i>
+        <div>
+          <div class="award-name">Newbie of the Batch &middot; July 2024</div>
+          <div class="award-sub">Morningstar | PitchBook Data</div>
+        </div>
+      </div>
+      <div class="award-row">
+        <i class="ti ti-star award-icon" aria-hidden="true"></i>
+        <div>
+          <div class="award-name">Spot Award &middot; May 2024</div>
+          <div class="award-sub">Morningstar | PitchBook Data</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 07 EDUCATION -->
+  <section class="sec" id="education">
+    <div class="sec-head">
+      <span class="sec-num">07</span>
+      <span class="sec-title">Education</span>
+      <div class="sec-line" aria-hidden="true"></div>
+    </div>
+    <div class="edu-rows">
+      <div class="edu-row">
+        <div>
+          <div class="edu-deg">MBA in Finance</div>
+          <div class="edu-school">Fr. C. Rodrigues Institute of Management Studies, Vashi, Navi Mumbai</div>
+        </div>
+        <div class="edu-yr">2023</div>
+      </div>
+      <div class="edu-row">
+        <div>
+          <div class="edu-deg">Bachelor of Commerce in Finance</div>
+          <div class="edu-school">N. G. Bedekar College of Commerce, Vashi, Navi Mumbai</div>
+        </div>
+        <div class="edu-yr">2020</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 08 CERTIFICATIONS -->
+  <section class="sec" id="certifications">
+    <div class="sec-head">
+      <span class="sec-num">08</span>
+      <span class="sec-title">Certifications</span>
+      <div class="sec-line" aria-hidden="true"></div>
+    </div>
+    <div class="cert-row">
+      <span class="cert">Advanced Excel</span>
+      <span class="cert">Financial Modelling</span>
+      <span class="cert">Financial Markets</span>
+    </div>
+  </section>
+
+  <!-- 09 LANGUAGES -->
+  <section class="sec" id="languages">
+    <div class="sec-head">
+      <span class="sec-num">09</span>
+      <span class="sec-title">Languages</span>
+      <div class="sec-line" aria-hidden="true"></div>
+    </div>
+    <div class="lang-row">
+      <span class="lang-pill native">Bengali &middot; Native</span>
+      <span class="lang-pill fluent">English &middot; C2</span>
+      <span class="lang-pill fluent">Hindi &middot; C2</span>
+      <span class="lang-pill fluent">Marathi &middot; C2</span>
+      <span class="lang-pill">German &middot; A1</span>
+    </div>
+  </section>
+
+</div>
+
+<script>
+(function(){
+  var html=document.documentElement;
+  var label=document.getElementById('toggle-label');
+  var metaTheme=document.getElementById('meta-theme');
+  function applyTheme(dark){
+    html.setAttribute('data-theme',dark?'dark':'light');
+    label.textContent=dark?'Light':'Dark';
+    if(metaTheme)metaTheme.setAttribute('content',dark?'#080808':'#faf8f4');
+  }
+  var saved=localStorage.getItem('aditi-theme');
+  applyTheme(saved==='dark');
+  function toggleTheme(){
+    var isDark=html.getAttribute('data-theme')==='dark';
+    applyTheme(!isDark);
+    try{localStorage.setItem('aditi-theme',(!isDark)?'dark':'light');}catch(e){}
+  }
+  var toggleEl=document.getElementById('theme-toggle');
+  toggleEl.addEventListener('click',toggleTheme);
+  toggleEl.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();toggleTheme();}});
+
+  var menuBtn=document.getElementById('menu-btn');
+  var mobileMenu=document.getElementById('mobile-menu');
+  menuBtn.addEventListener('click',function(){
+    var open=mobileMenu.classList.toggle('open');
+    menuBtn.setAttribute('aria-expanded',open?'true':'false');
+  });
+  mobileMenu.querySelectorAll('.nav-link').forEach(function(link){
+    link.addEventListener('click',function(){mobileMenu.classList.remove('open');menuBtn.setAttribute('aria-expanded','false');});
+  });
+  document.addEventListener('click',function(e){
+    if(!menuBtn.contains(e.target)&&!mobileMenu.contains(e.target)){mobileMenu.classList.remove('open');menuBtn.setAttribute('aria-expanded','false');}
+  });
+
+  var sections=document.querySelectorAll('section.sec[id]');
+  var allLinks=document.querySelectorAll('.nav-link[data-section]');
+  function setActive(id){allLinks.forEach(function(l){l.classList.toggle('active',l.getAttribute('href')==='#'+id);});}
+  if('IntersectionObserver' in window){
+    var io=new IntersectionObserver(function(entries){entries.forEach(function(entry){if(entry.isIntersecting)setActive(entry.target.id);});},{rootMargin:'-20% 0px -70% 0px',threshold:0});
+    sections.forEach(function(s){io.observe(s);});
+  } else {
+    window.addEventListener('scroll',function(){
+      var scrollY=window.scrollY+90;
+      sections.forEach(function(s){if(s.offsetTop<=scrollY&&s.offsetTop+s.offsetHeight>scrollY)setActive(s.id);});
+    },{passive:true});
+  }
+
+  /* Counter animation for hero stats — fires on load */
+  function animateCounter(el, target, suffix) {
+    if (!el) return;
+    var start = 0, duration = 1600, step = Math.ceil(target / 70);
+    var timer = setInterval(function() {
+      start += step;
+      if (start >= target) { start = target; clearInterval(timer); }
+      el.textContent = start.toLocaleString() + suffix;
+    }, duration / 70);
+  }
+  setTimeout(function() {
+    animateCounter(document.getElementById('cnt-profiles'), 1200, '+');
+    animateCounter(document.getElementById('cnt-loops'),    1700, '+');
+    animateCounter(document.getElementById('cnt-rounds'),   1000, '+');
+  }, 400);
+})();
+</script>
+<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.js"></script>
+<script>
+(function(){
+  /* ── Wait for DOM then init map ── */
+  function initMap(){
+    var el = document.getElementById('coverage-map');
+    if(!el) return;
+
+    /* Detect dark mode */
+    var isDark = document.documentElement.getAttribute('data-theme')==='dark';
+
+    /* Tile URLs — Stamen Toner-Lite (light) / CartoDB Dark (dark) */
+    var lightTile = 'https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png';
+    var darkTile  = 'https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png';
+
+    var map = L.map('coverage-map', {
+      center: [25, 15],
+      zoom: 2,
+      zoomControl: false,
+      scrollWheelZoom: false,
+      dragging: false,
+      doubleClickZoom: false,
+      touchZoom: false,
+      attributionControl: false
+    });
+
+    var tileLayer = L.tileLayer(isDark ? darkTile : lightTile, {
+      subdomains: 'abcd',
+      maxZoom: 5
+    }).addTo(map);
+
+    /* Switch tiles when theme toggles */
+    document.getElementById('theme-toggle').addEventListener('click', function(){
+      setTimeout(function(){
+        var d = document.documentElement.getAttribute('data-theme')==='dark';
+        tileLayer.setUrl(d ? darkTile : lightTile);
+        /* also update marker colours */
+        updateMarkerColors(d);
+      }, 50);
+    });
+
+    /* Custom circular marker */
+    function makeIcon(dark){
+      var outerColor = dark ? '#a08060' : '#8a6030';
+      var innerColor = dark ? '#c9b99a' : '#b08040';
+      var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 22 22">'
+        + '<circle cx="11" cy="11" r="10" fill="'+outerColor+'" opacity="0.35"/>'
+        + '<circle cx="11" cy="11" r="6" fill="'+outerColor+'" opacity="0.7"/>'
+        + '<circle cx="11" cy="11" r="3" fill="'+innerColor+'"/>'
+        + '</svg>';
+      return L.icon({
+        iconUrl: 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg),
+        iconSize: [22, 22],
+        iconAnchor: [11, 11],
+        popupAnchor: [0, -14]
+      });
+    }
+
+    var markets = [
+      { name: 'United Kingdom',  lat: 51.51,  lng: -0.13  },
+      { name: 'France',          lat: 48.85,  lng:  2.35  },
+      { name: 'Germany',         lat: 52.52,  lng: 13.40  },
+      { name: 'Switzerland',     lat: 46.95,  lng:  7.45  },
+      { name: 'Sweden',          lat: 59.33,  lng: 18.07  },
+      { name: 'Norway',          lat: 59.91,  lng: 10.75  },
+      { name: 'Denmark',         lat: 55.68,  lng: 12.57  },
+      { name: 'Italy',           lat: 41.90,  lng: 12.50  },
+      { name: 'UAE',             lat: 24.45,  lng: 54.38  },
+      { name: 'India',           lat: 20.59,  lng: 78.96  },
+      { name: 'Singapore',       lat:  1.35,  lng: 103.82 },
+      { name: 'South Korea',     lat: 37.57,  lng: 126.98 },
+      { name: 'Japan',           lat: 35.68,  lng: 139.69 },
+      { name: 'Australia',       lat:-25.27,  lng: 133.77 },
+      { name: 'Canada',          lat: 56.13,  lng: -106.35},
+      { name: 'North America',   lat: 37.09,  lng: -95.71 },
+      { name: 'South America',   lat:-14.24,  lng: -51.93 }
+    ];
+
+    var markers = [];
+    markets.forEach(function(m){
+      var mk = L.marker([m.lat, m.lng], { icon: makeIcon(isDark) })
+        .bindTooltip(m.name, { permanent: false, direction: 'top', className: 'map-tooltip' })
+        .addTo(map);
+      markers.push({ marker: mk, name: m.name });
+    });
+
+    function updateMarkerColors(dark){
+      markers.forEach(function(o){ o.marker.setIcon(makeIcon(dark)); });
+    }
+  }
+
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', initMap);
+  } else {
+    initMap();
+  }
+})();
+</script>
+<style>
+.map-tooltip{
+  background:var(--s1);border:0.5px solid var(--border2);
+  color:var(--text);font-family:'DM Sans',sans-serif;
+  font-size:11px;padding:4px 8px;border-radius:4px;
+  box-shadow:0 2px 8px rgba(0,0,0,.12);
+}
+.map-tooltip::before{display:none}
+</style>
+</body>
+</html>
